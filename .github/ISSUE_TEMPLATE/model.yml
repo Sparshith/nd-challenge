@@ -1,0 +1,79 @@
+name: Model submission
+description: Submit a checked ONNX model for source review and official evaluation.
+title: "[Model submission] "
+body:
+  - type: input
+    id: model_name
+    attributes:
+      label: Model name
+    validations:
+      required: true
+  - type: input
+    id: model_url
+    attributes:
+      label: ONNX download URL
+      description: Public direct-download link to the exact checked file, pinned to a release or commit.
+    validations:
+      required: true
+  - type: input
+    id: bytes
+    attributes:
+      label: File size in bytes
+      description: At most 10,000,000 bytes.
+    validations:
+      required: true
+  - type: input
+    id: sha256
+    attributes:
+      label: SHA-256
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source commit URL
+      description: Model, training and export code, pinned dependencies, and export instructions at a fixed commit in your fork.
+    validations:
+      required: true
+  - type: input
+    id: checkpoint
+    attributes:
+      label: Final checkpoint download URL
+      description: The weights needed to reproduce the ONNX export without rerunning training.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Architecture, data, and compression
+      description: Describe the model, training data, compression method, and applicable licenses.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Export reproduction commands
+      description: Include dependency installation and the exact export command.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Checker report
+      description: Paste the full browser JSON report or local checker output for this exact file.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Entry rules
+      options:
+        - label: This is a causal next-token decoder receiving only SAN move-history tokens.
+          required: true
+        - label: Inference uses no search, engines, hand-written chess logic, or extra downloads.
+          required: true
+        - label: I understand that the raw highest-scoring token is played and invalid predictions immediately lose.
+          required: true
+        - label: I understand that compatibility checks do not establish eligibility, which requires source review and official evaluation.
+          required: true

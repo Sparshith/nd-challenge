@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How much chess fits in 10 MB?</title>
+  <meta name="description" content="Train a next-move chess model under 10 MB. No search. Export it to ONNX and test it in the browser.">
+  <link rel="icon" href="data:">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Patrick+Hand&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&text=%E2%99%9A%E2%99%9B%E2%99%9C%E2%99%9D%E2%99%9E%E2%99%9F&display=block">
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <main>
+    <header><a href="https://www.sparshith.com/posts/nanodanya.html">nanoDanya</a><button id="agent" class="ghost agent" title="Copy a short prompt that points a coding agent at the contract">Copy prompt for your agent</button></header>
+
+    <section class="intro">
+      <div>
+        <h1>How much chess<br>fits in 10 MB?</h1>
+        <svg class="underline" viewBox="0 0 320 12" aria-hidden="true"><path d="M3 8c40-6 80 3 120-2s80-5 120 1 60 2 74-3"/></svg>
+        <p>Our bot has never seen a chessboard. It just reads the moves so far and guesses the next one. An illegal prediction loses immediately. No search. 9.4&nbsp;MB.</p>
+        <p class="dare">We think you can beat it.</p>
+      </div>
+      <svg class="comic" viewBox="0 0 220 150" tabindex="0" aria-label="A stick figure stares at a chessboard and thinks: 10 MB?! and no search?!">
+        <rect x="2" y="2" width="216" height="146" rx="6" class="panel"/>
+        <g class="figure">
+          <circle class="head" cx="52" cy="44" r="11"/>
+          <path d="M52 55c0 14 1 26 0 38"/>
+          <path class="arm-l" d="M52 64c-9 8-14 16-16 22"/>
+          <path class="arm-r" d="M52 64c8 4 18 7 27 8"/>
+          <path d="M52 93c-6 12-11 24-15 36M52 93c5 12 10 24 14 36"/>
+        </g>
+        <g class="table"><path d="M100 126h104M112 126c-1 7-2 12-3 18M198 126c2 7 3 12 4 18"/></g>
+        <g class="miniboard" transform="translate(118 90)">
+          <rect x="0" y="0" width="68" height="36" rx="1"/>
+          <path d="M8.5 0v36M17 0v36M25.5 0v36M34 0v36M42.5 0v36M51 0v36M59.5 0v36M0 9h68M0 18h68M0 27h68" class="grid"/>
+          <path d="M0 0h8.5v9H0zM17 0h8.5v9H17zM34 0h8.5v9H34zM51 0h8.5v9H51zM8.5 9h8.5v9H8.5zM25.5 9h8.5v9h-8.5zM42.5 9h8.5v9h-8.5zM59.5 9h8.5v9h-8.5zM0 18h8.5v9H0zM17 18h8.5v9H17zM34 18h8.5v9H34zM51 18h8.5v9H51zM8.5 27h8.5v9H8.5zM25.5 27h8.5v9h-8.5zM42.5 27h8.5v9h-8.5zM59.5 27h8.5v9h-8.5z" class="fill"/>
+        </g>
+        <g class="bubble">
+          <path d="M92 18c18-6 66-7 88 0 8 3 8 20 0 24-10 5-46 6-70 3l-14 11 3-13c-11-4-14-19-7-25z"/>
+          <text class="say" x="136" y="37" text-anchor="middle">10 MB?!</text>
+          <text class="say alt" x="136" y="37" text-anchor="middle">…and no search?!</text>
+        </g>
+      </svg>
+    </section>
+
+    <section class="leaderboard">
+      <h2>Leaderboard</h2>
+      <div class="table"><table>
+        <thead><tr><th>#</th><th>Entry</th><th>By</th><th class="num">Size</th><th class="num" title="Full solutions on 8,800 Lichess puzzles rated 600 to 2800">Puzzles solved</th><th class="num">Elo <button class="info" popovertarget="elo-info" aria-label="How Elo is calculated">?</button></th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>nanoDanya baseline <span class="note">the starter: 9 layers, 200k steps, no teacher</span></td><td><a href="https://github.com/Sparshith">Sparshith</a></td><td class="num">9.45 MB</td><td class="num" title="1,941 full solutions out of 8,800 puzzles, without legal masking">22.1%</td><td class="num"><strong>1303</strong> <span class="ci">±16</span></td></tr>
+          <tr><td>2</td><td>nanoDanya v1 <span class="note">6 layers, distilled</span></td><td><a href="https://github.com/Sparshith">Sparshith</a></td><td class="num">9.63 MB</td><td class="num">Pending</td><td class="num">Pending</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <div id="elo-info" class="tip" popover>
+      <strong>How we get the Elo</strong>
+      <p>Each entry plays 1,200 games against Stockfish at three strengths, from 200 fixed openings with both colors. A game stops when one side is clearly winning.</p>
+      <p>BayesElo turns the results into ratings, with Stockfish 1500 at depth 1 pinned to 1500. So it is not a human rating.</p>
+      <p>The baseline scores 1303 ±16 over 1,200 games without legal masking; 691 games ended in a forfeit for an invalid prediction. Its previous masked score was 1517. Masked games are excluded from this rating pool. The v1 reevaluation is pending.</p>
+    </div>
+
+    <div class="layout">
+      <div class="left">
+      <section class="checker">
+        <h2>Try yours</h2>
+        <label id="drop" class="drop" for="file"><span>Drop your model.onnx here <u>or pick a file</u></span><small>Under 10 MB. Runs in your browser. Nothing leaves your machine.</small><input id="file" type="file" accept=".onnx"></label>
+        <p id="filename" class="muted" hidden></p>
+        <div id="file-row" class="file-row" hidden><span id="file-name"></span><span class="passed">✓ passed</span><label for="file" class="link">Replace</label></div>
+        <p id="status" role="status" aria-live="polite"></p>
+        <ol id="checks" class="checks" hidden><li id="size-check">Size ≤ 10 MB</li><li id="load-check">Model loads</li><li id="output-check">Finite logits on 4 test games</li></ol>
+        <div class="actions"><button id="check" hidden>Check again</button><button id="stop" class="ghost" hidden>Stop</button></div>
+        <div id="result" class="result" hidden>
+          <div class="summary"><span>Match vs the baseline</span><strong id="h2h-score"></strong></div>
+          <p id="h2h-detail" class="muted"></p>
+          <div class="match-bar"><button id="match">Start match</button><div class="progress"><div id="progress"></div></div></div>
+          <div id="strip" class="strip" aria-label="Game results"></div>
+          <div class="result-foot"><details class="details"><summary>Details</summary><p id="metrics" class="muted"></p><button id="report" class="link">Save check report (JSON)</button></details><button id="submit-entry" class="ghost">Submit model</button></div>
+        </div>
+        <p id="sample" class="muted">No model yet? <a href="assets/baseline.onnx" download>Grab the baseline</a> and watch it play itself.</p>
+      </section>
+      <section class="rules">
+        <h2>The rules, short version</h2>
+        <dl class="spec">
+          <dt>File</dt><dd>One ONNX file, at most 10 MB, with the vocabulary in its metadata. No extra downloads.</dd>
+          <dt>Tokens</dt><dd>One SAN move per token. Bring your own list, or use ours (14,750 tokens). The highest-scoring token is your move. Illegal moves and non-move tokens lose immediately. No masking or retries; check and mate suffixes remain optional.</dd>
+          <dt>Input</dt><dd>Move history as your token ids, starting with <code>&lt;bos&gt;</code></dd>
+          <dt>Output</dt><dd>One logit per token in your list</dd>
+          <dt>Context</dt><dd>64 to 4,096 tokens</dd>
+          <dt>Not allowed</dt><dd>Search, engines, hand-written heuristics</dd>
+          <dt>Training</dt><dd>Anything goes</dd>
+        </dl>
+      </section>
+      </div>
+      <section class="game" id="game-panel" data-mode="match">
+        <div class="tabs" role="tablist"><button id="tab-match" role="tab" aria-selected="true">Match</button><button id="tab-play" role="tab" aria-selected="false">Play it yourself</button></div>
+        <div class="player"><span id="top-name">Baseline</span><strong id="top-score"></strong></div>
+        <div id="board" class="board" aria-label="Chess board"></div>
+        <div class="player"><span id="bottom-name">Your model</span><strong id="bottom-score"></strong></div>
+        <div id="promotion" hidden>Promote to <select id="promotion-piece"><option value="q">Queen</option><option value="r">Rook</option><option value="b">Bishop</option><option value="n">Knight</option></select><button id="promote">Promote</button></div>
+        <p id="game-status" role="status" class="muted">Pass the check and your model plays here.</p>
+        <div class="actions controls"><button id="new" class="ghost">New game</button><button id="undo" class="ghost">Undo</button><button id="black" class="ghost">Play as Black</button></div>
+        <p id="moves" class="moves"></p>
+      </section>
+    </div>
+    <footer>The full contract is in <a href="https://github.com/Sparshith/nanoDanya-challenge/blob/main/llms.txt">llms.txt</a>. Passing the check does not put you on the board. We read the code and run the real match first.</footer>
+  </main>
+  <dialog id="submission-dialog" class="submission" aria-labelledby="submission-heading">
+    <div class="submission-head"><h2 id="submission-heading">Let your agent submit it</h2><button id="submission-close" class="ghost" aria-label="Close submission">×</button></div>
+    <p id="submission-status" class="muted"></p>
+    <p class="submission-intro">Paste this into your coding agent. It will host your ONNX file, link the source, and open a submission on GitHub.</p>
+    <button id="submission-copy">Copy submission prompt</button>
+    <p id="submission-copy-status" class="muted" role="status">Your model’s hash and check report are included.</p>
+    <textarea id="submission-prompt" aria-label="Submission prompt" readonly hidden></textarea>
+  </dialog>
+  <script type="module" src="app.bundle.js"></script>
+  <!-- Cloudflare Web Analytics -->
+  <script>
+    (function () {
+      const host = window.location.hostname;
+      const isLocal = window.location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+      if (isLocal) return;
+      const script = document.createElement('script');
+      script.defer = true;
+      script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      script.setAttribute('data-cf-beacon', '{"token": "67cde0995dfd4323bacc1eee0ab33aa2"}');
+      document.body.appendChild(script);
+    })();
+  </script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

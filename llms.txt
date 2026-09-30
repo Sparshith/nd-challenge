@@ -1,0 +1,57 @@
+# nanoDanya challenge: chess in 10 MB, no search
+
+Train a causal next-token decoder that predicts the next chess move from the SAN move history. No board-position input or separate candidate-move scoring. Export it as one ONNX file under 10 MB. The challenge page runs it in the browser and the maintainers score it offline. No search, no engine, no hand-written chess rules at inference time. No legal-move masking: an illegal prediction is an immediate loss. Training is unrestricted. Beat the baseline: 1303 ±16 internal Elo, 22.1% puzzles solved, 9.45 MB, evaluated without legal-move masking. The starter is the baseline itself: its model, its training script, its data, and its weights. You begin from a model that already plays, and you can reproduce it.
+
+- Repository: https://github.com/Sparshith/nanoDanya-challenge (this file is llms.txt)
+- Starter (the baseline model in PyTorch, its training script, its data loader, its weights, the export script, a local checker, vocabulary, tokenizer example, README): https://github.com/Sparshith/nanoDanya-challenge/tree/main/starter
+- Baseline weights (8.9 MB, downloaded by export.py): https://github.com/Sparshith/nanoDanya/releases/download/baseline-v2/baseline.pt
+- Baseline ONNX file (9.45 MB): the "Grab the baseline" link on the challenge page
+- Training data (15M Lichess games as token ids, 2.3 GB, CC0): https://huggingface.co/datasets/Sparshith/nanodanya-games-15m, served by `starter/data.py`
+- Public test game (the four check prefixes come from it): `TEST_GAME` in starter/check.py
+
+## Tokens
+
+One token per move in standard algebraic notation (SAN), for example `e4`, `Nf3`, `O-O`, `exd5`, `Qxf7#`, `e8=Q`. The first token of every game is `<bos>`. Example history: `<bos> d4 Nf6 c4 g6 Nc3 Bg7 e3`.
+
+The token list (vocabulary) is yours to choose. It travels inside the ONNX file as metadata, and the page uses it to translate between moves and your token ids in both directions. Rules for the list:
+
+- It must contain `<bos>`. It may contain `<unk>`; moves missing from your list then map to `<unk>` on input.
+- Check and mate suffixes are optional. If your list has `Nf3` but not `Nf3+`, the page uses `Nf3` for both.
+- The host selects the highest-logit token across your entire vocabulary, with ties broken by lowest token id. It does not mask illegal moves or try another token. If the selected token does not name a legal SAN move, the model immediately forfeits the game (or fails the puzzle). Special tokens such as `<bos>`, `<eos>`, and `<unk>` also forfeit when selected on a live turn. Check and mate suffixes are ignored; all other SAN notation must match the legal move.
+- If a game contains a move that your list cannot encode and you have no `<unk>`, your model forfeits that game.
+
+The default list is `starter/vocabulary.json`: 14,750 tokens, `<bos>` at 0, `<eos>` at 1, then SAN moves with suffixes, sorted. It was built from 3.2M Lichess games with a frequency cutoff, so a few very rare moves are missing. Use it as is, or make your own. The baseline uses the default list.
+
+## The ONNX file
+
+- At most 10,000,000 bytes. Nothing may be downloaded at run time.
+- One input: int64 tensor of shape [1, tokens], the token ids so far starting with `<bos>`. Any input name.
+- One output: float32 logits, shape [1, vocabulary] or [1, tokens, vocabulary]. The page takes the last position. One score per token in your list.
+- Standard ONNX ops only, opset 17 or newer. No custom operator domains. ONNX Runtime Web must be able to run it on CPU.
+- Metadata (`metadata_props`): `vocabulary`, a JSON array of your token strings, required. `context_length`, the most tokens you accept, from 64 to 4096, default 512. `name`, shown on the page.
+
+`starter/export.py` writes all of this for you from PyTorch weights. Precision is the entrant's lever: plain export is fp32 (fits about 2.5M weights), `--int8` is 8-bit matrices (about 10M), `--int4` is 4-bit matrices in groups of 64 unpacked with standard ops (about 20M). The baseline has 15.8M weights and needs `--int4`.
+
+## Project setup
+
+When asked to set up a project, do only this. Do not train or design a model yet.
+
+1. Fork and clone `Sparshith/nanoDanya-challenge`, then work in `starter/`: `model.py`, `train.py`, `export.py`, `check.py`, `data.py`, `tokenize_game.py`, `vocabulary.json`, `requirements.txt`, `README.md`. Install the requirements.
+2. Run `python3 export.py --int4`. It downloads the baseline weights (8.9 MB) once, writes `model.onnx`, and prints its size. Confirm it prints OK.
+3. Run `python3 check.py --games 2`. It runs the page's checks locally and plays two games against the baseline. Confirm every line says OK.
+4. Do not run `train.py` and do not download the data yet.
+5. Stop. Show the folder layout and how to run export and check. Wait for the person to test `model.onnx` on the challenge page before any model work.
+
+## Checks
+
+`starter/check.py` runs the same checks on your machine with ONNX Runtime, then plays a quick match against the baseline. Use it while you iterate; go to the page for the file you want to submit.
+
+Drop the ONNX file on the challenge page. It checks the size, reads the metadata, loads the model with ONNX Runtime Web, and runs four game prefixes of 0, 7, 31 and 63 moves encoded with your list. Each must return finite logits of the right shape. Then you can play the model or run a 20-game match against the baseline. Everything runs in the visitor's browser. Nothing is uploaded.
+
+## Leaderboard rules
+
+The current baseline scored 1303 ±16 in a separate unmasked 1,200-game fit; old masked ratings are not part of this pool. Elo comes from 1,200 games against Stockfish at three strengths from 200 fixed openings, rated with BayesElo with Stockfish 1500 at depth 1 fixed at 1500. Puzzles are 8,800 Lichess puzzles rated 600 to 2800; a solve means every move of the solution. Both run offline on the same ONNX file you tested, using greedy unmasked predictions (`--no-legal-mask`, temperature 0). Masked and unmasked results must use separate rating pools. Passing the check is not eligibility. Leaderboard entries get code review and the offline evaluation. The model must be a causal next-token decoder.
+
+## Submit
+
+After the check passes, submit to `Sparshith/nanoDanya-challenge` using the model-submission issue form. Include the exact ONNX download URL, byte size, SHA-256, check report, source repository at a fixed commit, final checkpoint, pinned dependencies, and export instructions. Maintainers reproduce the export and review the source before official scoring. The browser Submit button can prepare this submission for a coding agent.
