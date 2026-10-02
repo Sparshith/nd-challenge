@@ -23,10 +23,10 @@ test('rejects files without vocabulary metadata or that are not ONNX', () => {
   assert.throws(() => readOnnxMeta(new TextEncoder().encode('PK not onnx')), /ONNX/);
 });
 
-test('the starter export carries the default vocabulary', async t => {
-  const path = new URL('../starter/model.onnx', import.meta.url);
+test('the served baseline carries the default vocabulary', async t => {
+  const path = new URL('./assets/baseline.onnx', import.meta.url);
   const file = await readFile(path).catch(() => null);
-  if (!file) return t.skip('starter not exported');
+  if (!file) return t.skip('baseline not packed');
   const parsed = readEntry(new Uint8Array(file));
   assert.equal(parsed.vocabulary.length, 14750);
   assert.equal(parsed.vocabulary[0], '<bos>');

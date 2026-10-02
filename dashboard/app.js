@@ -285,10 +285,10 @@ addEventListener('pagehide', () => { sandbox?.stop(); baseline?.runner.stop(); }
 renderResults(); renderBoard();
 
 $('agent').onclick = async () => {
-  const repo = 'https://github.com/Sparshith/nanoDanya-challenge/blob/main/';
+  const repo = 'https://github.com/Sparshith/nd-challenge/blob/main/';
   const text = `Set up a project for the nanoDanya chess challenge: a next-move chess model exported as one ONNX file under 10 MB, no search, runs in the browser.
 Read the contract first: ${repo}llms.txt and follow its "Project setup" section. Do not train or build the model yet.
-Fork Sparshith/nanoDanya-challenge and work from the starter folder: ${repo}starter (the baseline model in PyTorch, export.py, vocabulary, tokenizer example, README).
+Fork Sparshith/nd-challenge and work from the starter folder: ${repo}starter (the baseline model in PyTorch, export.py, vocabulary, tokenizer example, README).
 Baseline to beat (1303 Elo without masking, 9.45 MB): ${new URL(BASELINE_URL, location.href).href}. The starter exports it exactly with export.py --int4.
 Run export.py --int4 and check.py --games 2. When every line says OK, stop and show me the folder layout.
 `;

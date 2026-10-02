@@ -88,10 +88,12 @@
           <dt>File</dt><dd>One ONNX file, at most 10 MB, with the vocabulary in its metadata. No extra downloads.</dd>
           <dt>Tokens</dt><dd>One SAN move per token. Bring your own list, or use ours (14,750 tokens). The highest-scoring token is your move. Illegal moves and non-move tokens lose immediately. No masking or retries; check and mate suffixes remain optional.</dd>
           <dt>Input</dt><dd>Move history as your token ids, starting with <code>&lt;bos&gt;</code></dd>
+          <dt>Model</dt><dd>A causal next-token decoder reading SAN move history only. No board/FEN inputs or bidirectional attention.</dd>
           <dt>Output</dt><dd>One logit per token in your list</dd>
           <dt>Context</dt><dd>64 to 4,096 tokens</dd>
           <dt>Not allowed</dt><dd>Search, engines, hand-written heuristics</dd>
           <dt>Training</dt><dd>Anything goes</dd>
+          <dt>Submit</dt><dd>The exact ONNX file and checker report, source at a fixed commit, and the final checkpoint with pinned dependencies and export instructions. We review and evaluate entries before publishing scores.</dd>
         </dl>
       </section>
       </div>
@@ -106,7 +108,7 @@
         <p id="moves" class="moves"></p>
       </section>
     </div>
-    <footer>The full contract is in <a href="https://github.com/Sparshith/nanoDanya-challenge/blob/main/llms.txt">llms.txt</a>. Passing the check does not put you on the board. We read the code and run the real match first.</footer>
+    <footer>The full contract is in <a href="https://github.com/Sparshith/nd-challenge/blob/main/llms.txt">llms.txt</a>. Passing the check does not put you on the board. We read the code and run the real match first.</footer>
   </main>
   <dialog id="submission-dialog" class="submission" aria-labelledby="submission-heading">
     <div class="submission-head"><h2 id="submission-heading">Let your agent submit it</h2><button id="submission-close" class="ghost" aria-label="Close submission">×</button></div>

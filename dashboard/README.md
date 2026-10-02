@@ -12,17 +12,19 @@ python3 pack.py      # runs starter/export.py --int4 into assets/baseline.onnx
 python3 serve.py     # http://127.0.0.1:8765/
 ```
 
-`pack.py` needs `starter/baseline.pt`. The tests: `npm test` for the page's metadata reader, `python3 -m pytest baseline/test_export.py` for the export.
+`pack.py` downloads `starter/baseline.pt` on the first run. The tests: `npm test` for browser logic, `python3 -m pytest` from the repository root for entry rules and export parity.
 
 ## Deploy
 
-The page is static. It lives at https://www.sparshith.com/nd-challenge/, served by GitHub Pages from the blog repository.
+GitHub Actions builds, tests, and publishes this repository to https://www.sparshith.com/nd-challenge/ on every push to `main`. Pull requests build and test without publishing. No files are copied into the blog repository.
 
 ```sh
-python3 deploy.py --to /path/to/blog/nd-challenge    # build, pack, and copy into the chosen site repo
+python3 dashboard/package_site.py    # from the repository root, build output/site
 ```
 
-Then commit and push `nd-challenge/` in the blog repository. The copy is 24 MB: the page, the two bundles, the wasm runtime (14 MB) and the baseline (9.6 MB). GitHub Pages sends no cross-origin isolation headers, so ONNX Runtime runs single-threaded there: about 40 ms per move for the baseline instead of 30. Build outputs (`*.bundle.js`, `ort/`, `assets/`) are not committed here; `deploy.py` rebuilds them.
+The artifact contains only the page, styles, browser bundles, ONNX Runtime files, and baseline. Generated files stay untracked. GitHub Pages runs ONNX Runtime single-threaded because it does not provide cross-origin isolation headers.
+
+Repository Settings → Pages must use **GitHub Actions**. Leave the custom domain empty: this project inherits `www.sparshith.com` from the account's main site, and the repository name `nd-challenge` supplies the URL path. The deployment job is restricted to `Sparshith/nd-challenge` on `main`; forks can run the checks without publishing to the official site.
 
 ## What the page does
 

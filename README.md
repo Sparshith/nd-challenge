@@ -37,12 +37,13 @@ python3 check.py
 ```
 
 See the [starter guide](starter/README.md) and [full rules](llms.txt).
-The existing [browser checker](https://www.sparshith.com/nd-challenge/) is deployed
-separately; changes to this repository do not automatically update that site.
+The [browser checker](https://www.sparshith.com/nd-challenge/) is built and deployed
+from this repository. Pull requests run the tests and build; merges into `main`
+automatically publish the site after those checks pass.
 
 ## Submit
 
-Open a [model submission issue](https://github.com/Sparshith/nanoDanya-challenge/issues/new/choose) with:
+Open a [model submission issue](https://github.com/Sparshith/nd-challenge/issues/new/choose) with:
 
 - A public, direct-download URL for the exact `model.onnx` file, its byte size and SHA-256.
 - A link to your fork at a fixed commit containing the model, training and export code, pinned dependencies, and export instructions.
@@ -58,6 +59,10 @@ token; invalid moves and non-move tokens lose immediately.
 Official evaluation uses 8,800 puzzles and 1,200 games from 200 openings, both
 colors, against three Stockfish settings. Masked and unmasked results use separate
 rating pools. Submission issues are a manual queue and do not launch compute.
+After official evaluation, maintainers merge approved leaderboard updates into
+`dashboard/index.html`; that merge publishes the updated scores. Replacing the
+downloadable baseline also requires updating its checkpoint/export recipe and
+evaluation results in the same change.
 
 ## Repository layout
 
